@@ -1,0 +1,19 @@
+// This Prisma schema connects to your Supabase PostgreSQL instance
+// and defines a Recipe model.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Recipe {
+  id           String   @id @default(uuid())
+  title        String
+  ingredients  String[]
+  instructions String
+  createdAt    DateTime @default(now())
+}
