@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { connectToDatabase, Recipe, CreateRecipeInput } from '@/lib/mongodb';
-import { supabaseAdmin } from '@/lib/supabase';
+import connectDB from '@/lib/mongoose';
+import Recipe from '@/models/Recipe';
 
 export async function POST(request: NextRequest) {
   try {
+    await connectDB();
     const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json(
@@ -13,48 +14,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body: CreateRecipeInput = await request.json();
-    
-    if (!body.title || !body.description || !body.ingredients || !body.steps) {
+    const body = await request.json();
+    const { title, description, ingredients, steps } = body;
+
+    if (!title || !description || !ingredients || !steps) {
       return NextResponse.json(
         { error: 'Missing required fields: title, description, ingredients, steps' },
         { status: 400 }
       );
     }
 
-    const { db } = await connectToDatabase();
-    const recipesCollection = db.collection('recipes');
-
-    const recipe: Recipe = {
+    const recipe = await Recipe.create({
       userId: user.id,
-      title: body.title,
-      description: body.description,
-      ingredients: body.ingredients,
-      steps: body.steps,
-      createdAt: new Date()
-    };
-
-    const result = await recipesCollection.insertOne(recipe);
-    
-    if (!result.insertedId) {
-      throw new Error('Failed to insert recipe into MongoDB');
-    }
-
-    const { error: supabaseError } = await supabaseAdmin
-      .from('recipes')
-      .insert({
-        user_id: user.id,
-        recipe_title: body.title,
-        created_at: new Date().toISOString()
-      });
-
-    if (supabaseError) {
-      console.error('Supabase error:', supabaseError);
-    }
+      title,
+      description,
+      ingredients,
+      steps
+    });
 
     return NextResponse.json({
       success: true,
-      recipeId: result.insertedId.toString(),
+      recipeId: recipe._id,
       message: 'Recipe created successfully'
     }, { status: 201 });
 
@@ -69,6 +49,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
+    await connectDB();
     const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json(
@@ -77,17 +58,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { db } = await connectToDatabase();
-    const recipesCollection = db.collection('recipes');
-
-    const recipes = await recipesCollection
-      .find({ userId: user.id })
-      .sort({ createdAt: -1 })
-      .toArray();
+    const recipes = await Recipe.find({ userId: user.id }).sort({ createdAt: -1 });
 
     return NextResponse.json({
       success: true,
-      recipes: recipes,
+      recipes,
       count: recipes.length
     });
 

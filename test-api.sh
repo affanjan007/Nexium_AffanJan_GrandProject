@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Test API Script for AI-Powered Recipe Generator
-# Make sure to replace YOUR_JWT_TOKEN with the actual token from the test page
-
 echo "Testing API Endpoints"
 echo "========================"
 

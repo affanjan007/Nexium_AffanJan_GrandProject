@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from './supabase';
+import { User } from '@supabase/supabase-js';
 
 export async function getAuthenticatedUser(request: NextRequest) {
   try {
@@ -24,7 +25,7 @@ export async function getAuthenticatedUser(request: NextRequest) {
   }
 }
 
-export function createAuthMiddleware(handler: (request: NextRequest) => Promise<NextResponse>) {
+export function createAuthMiddleware(handler: (request: NextRequest, user: User) => Promise<NextResponse>) {
   return async (request: NextRequest) => {
     const user = await getAuthenticatedUser(request);
     
@@ -35,8 +36,6 @@ export function createAuthMiddleware(handler: (request: NextRequest) => Promise<
       );
     }
 
-    request.user = user;
-    
-    return handler(request);
+    return handler(request, user);
   };
 } 

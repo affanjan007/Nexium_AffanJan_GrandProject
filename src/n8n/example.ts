@@ -1,3 +1,5 @@
+// run this:  cd n8n then npx tsx example.ts
+
 import { triggerN8nWebhook } from './client';
 
 // Trigger the RecipeGenerator workflow in n8n

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
-import { ObjectId } from 'mongodb';
 import connectDB from '@/lib/mongoose';
-import mongoose from 'mongoose';
+import Recipe from '@/models/Recipe';
 
 export async function GET(
   request: NextRequest,
@@ -17,7 +16,7 @@ export async function GET(
       );
     }
 
-    if (!params.id || !ObjectId.isValid(params.id)) {
+    if (!params.id) {
       return NextResponse.json(
         { error: 'Invalid recipe ID' },
         { status: 400 }
@@ -25,12 +24,7 @@ export async function GET(
     }
 
     await connectDB();
-    const recipesCollection = mongoose.connection.collection('recipes');
-
-    const recipe = await recipesCollection.findOne({
-      _id: new ObjectId(params.id),
-      userId: user.id
-    });
+    const recipe = await Recipe.findOne({ _id: params.id, userId: user.id });
 
     if (!recipe) {
       return NextResponse.json(
@@ -66,7 +60,7 @@ export async function DELETE(
       );
     }
 
-    if (!params.id || !ObjectId.isValid(params.id)) {
+    if (!params.id) {
       return NextResponse.json(
         { error: 'Invalid recipe ID' },
         { status: 400 }
@@ -74,14 +68,9 @@ export async function DELETE(
     }
 
     await connectDB();
-    const recipesCollection = mongoose.connection.collection('recipes');
+    const result = await Recipe.findOneAndDelete({ _id: params.id, userId: user.id });
 
-    const result = await recipesCollection.deleteOne({
-      _id: new ObjectId(params.id),
-      userId: user.id
-    });
-
-    if (result.deletedCount === 0) {
+    if (!result) {
       return NextResponse.json(
         { error: 'Recipe not found or access denied' },
         { status: 404 }

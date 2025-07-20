@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase-client';
 import { User } from '@supabase/supabase-js';
 
+type ScrollRevealFn = () => { reveal: (selector: string, options?: Record<string, unknown>) => void };
+
 export default function TestAuthPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [session, setSession] = useState<{ user: User } | null>(null);
   const [jwtToken, setJwtToken] = useState('');
-
 
   useEffect(() => {
     checkSession();
@@ -24,6 +25,46 @@ export default function TestAuthPage() {
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const loadScrollReveal = async () => {
+      if (typeof window !== 'undefined') {
+        if (!(window as unknown as { ScrollReveal?: ScrollRevealFn }).ScrollReveal) {
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/scrollreveal';
+          script.async = true;
+          script.onload = () => {
+            animateSections();
+          };
+          document.body.appendChild(script);
+        } else {
+          animateSections();
+        }
+      }
+    };
+    function animateSections() {
+      if (!(window as unknown as { ScrollReveal?: ScrollRevealFn }).ScrollReveal) return;
+      (window.ScrollReveal as ScrollRevealFn)().reveal('[data-sr]', {
+        distance: '40px',
+        duration: 1500,
+        easing: 'cubic-bezier(0.5, 0, 0, 1)',
+        origin: 'bottom',
+        interval: 120,
+        opacity: 0,
+        reset: false,
+        cleanup: true,
+      });
+      (window.ScrollReveal as ScrollRevealFn)().reveal('[data-sr-drop]', {
+        distance: '120px',
+        duration: 1800,
+        origin: 'top',
+        opacity: 0,
+        reset: false,
+        cleanup: true,
+      });
+    }
+    loadScrollReveal();
   }, []);
 
   const checkSession = async () => {
@@ -86,46 +127,49 @@ export default function TestAuthPage() {
     }
   };
 
-
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+    <div className="min-h-screen relative bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden" data-sr>
+      {/* SVG Pattern Overlay */}
+      <svg className="absolute inset-0 w-full h-full opacity-10 pointer-events-none" xmlns="http://www.w3.org/2000/svg" fill="none"><defs><pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" fill="#6366f1" /></pattern></defs><rect width="100%" height="100%" fill="url(#dots)" /></svg>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-between mb-6" data-sr>
             <Link
               href="/"
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="inline-flex items-center text-slate-600 hover:text-slate-900 font-medium transition-colors"
             >
-              ← Back to Home
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Home
             </Link>
           </div>
 
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8" data-sr>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">
               Authentication Test
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-slate-600">
               Test Supabase magic link authentication and API endpoints
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden" data-sr>
             {!session ? (
               <div className="p-8">
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="text-center mb-8" data-sr>
+                  <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sign In</h2>
-                  <p className="text-gray-600">Enter your email to receive a magic link</p>
+                  <h2 className="text-2xl font-semibold text-slate-900 mb-2">Sign In</h2>
+                  <p className="text-slate-600">Enter your email to receive a magic link</p>
                 </div>
 
-                <form onSubmit={handleSignIn} className="space-y-6">
+                <form onSubmit={handleSignIn} className="space-y-6" data-sr-drop>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                       Email Address
                     </label>
                     <input
@@ -134,7 +178,7 @@ export default function TestAuthPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-colors bg-slate-50"
                       placeholder="you@example.com"
                     />
                   </div>
@@ -142,7 +186,7 @@ export default function TestAuthPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="w-full bg-slate-900 text-white py-3 px-4 rounded-xl font-medium hover:bg-slate-800 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                   >
                     {loading ? (
                       <div className="flex items-center justify-center">
@@ -158,23 +202,23 @@ export default function TestAuthPage() {
                   </button>
                 </form>
 
-                <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">How to Test:</h3>
-                  <ol className="space-y-2 text-sm text-gray-600">
+                <div className="mt-8 p-6 bg-slate-50 rounded-xl" data-sr>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3">How to Test:</h3>
+                  <ol className="space-y-2 text-sm text-slate-600">
                     <li className="flex items-start">
-                      <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">1</span>
-                      Enter your email address above and click &quot;Send Magic Link&quot;
+                      <span className="flex-shrink-0 w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">1</span>
+                      Enter your email address above and click Send Magic Link
                     </li>
                     <li className="flex items-start">
-                      <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">2</span>
-                      Check your email inbox for the magic link
+                      <span className="flex-shrink-0 w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">2</span>
+                      Check your email inbox for the Magic Link
                     </li>
                     <li className="flex items-start">
-                      <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">3</span>
-                      Click the magic link to sign in automatically
+                      <span className="flex-shrink-0 w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">3</span>
+                      Click the Magic Link to sign in automatically
                     </li>
                     <li className="flex items-start">
-                      <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">4</span>
+                      <span className="flex-shrink-0 w-6 h-6 bg-slate-900 text-white rounded-full flex items-center justify-center text-xs font-medium mr-3 mt-0.5">4</span>
                       Once signed in, you can test API calls
                     </li>
                   </ol>
@@ -182,34 +226,35 @@ export default function TestAuthPage() {
               </div>
             ) : (
               <div className="p-8">
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="text-center mb-8" data-sr>
+                  <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-900 mb-2">Welcome!</h2>
-                  <p className="text-gray-600">{session.user.email}</p>
+                  <h2 className="text-2xl font-semibold text-slate-900 mb-2">Welcome!</h2>
+                  <p className="text-slate-600">{session.user.email}</p>
+                  <div className="mt-2 text-xs text-slate-500">User ID: <span className="font-mono break-all">{session.user.id}</span></div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 gap-4 mb-6" data-sr-drop>
                   <button
                     onClick={testApiCall}
-                    className="bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+                    className="bg-green-500 text-white py-3 px-4 rounded-xl font-medium hover:bg-green-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
                   >
                     Test API Call
                   </button>
                   <button
                     onClick={handleSignOut}
-                    className="bg-red-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+                    className="bg-slate-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-slate-700 focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 transition-colors"
                   >
                     Sign Out
                   </button>
                 </div>
 
-                <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-3">API Testing</h3>
-                  <p className="text-sm text-blue-800 mb-3">
+                <div className="p-6 bg-slate-50 rounded-xl border border-slate-200" data-sr>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-3">API Testing</h3>
+                  <p className="text-sm text-slate-800 mb-3">
                     Use your JWT token to test the API endpoints:
                   </p>
                   <div className="space-y-2 text-sm">
@@ -225,8 +270,8 @@ export default function TestAuthPage() {
             )}
 
             {message && (
-              <div className={`px-8 pb-6 ${session ? 'pt-0' : ''}`}>
-                <div className={`p-4 rounded-lg border ${
+              <div className={`px-8 pb-6 ${session ? 'pt-0' : ''}`} data-sr-drop>
+                <div className={`p-4 rounded-xl border ${
                   message.includes('Error') 
                     ? 'bg-red-50 border-red-200 text-red-800' 
                     : 'bg-green-50 border-green-200 text-green-800'
@@ -240,4 +285,4 @@ export default function TestAuthPage() {
       </div>
     </div>
   );
-} 
+}
