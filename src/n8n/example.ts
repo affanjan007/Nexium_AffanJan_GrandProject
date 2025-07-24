@@ -1,10 +1,7 @@
-// run this:  cd n8n then npx tsx example.ts
-
 import { triggerN8nWebhook } from './client';
 
-// Trigger the RecipeGenerator workflow in n8n
 export async function triggerRecipeGenerator(message: string) {
-  const n8nWebhookUrl = 'http://localhost:5678/webhook-test/recipe';
+  const n8nWebhookUrl = 'http://localhost:5678/webhook/recipe';
   const payload = { message };
 
   try {

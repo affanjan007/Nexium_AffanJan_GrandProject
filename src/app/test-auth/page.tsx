@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase-client';
 import { User } from '@supabase/supabase-js';
 
+// ScrollReveal type for TS
 type ScrollRevealFn = () => { reveal: (selector: string, options?: Record<string, unknown>) => void };
 
 export default function TestAuthPage() {

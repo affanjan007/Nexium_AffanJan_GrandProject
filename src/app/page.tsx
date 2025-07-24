@@ -263,7 +263,7 @@ export default function Home() {
               Add Your Ingredients
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Simply list the ingredients you have available in your kitchen
+              Simply list the ingredients you have available in your kitchen or just name the dish
             </p>
           </div>
 

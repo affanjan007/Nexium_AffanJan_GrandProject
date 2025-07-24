@@ -20,6 +20,28 @@ const RecipeSchema = new mongoose.Schema({
   steps: [{
     type: String
   }],
+  nutrition: {
+    calories: {
+      type: Number,
+      default: 0
+    },
+    weight: {
+      type: Number,
+      default: 0
+    },
+    protein: {
+      type: Number,
+      default: 0
+    },
+    carbohydrates: {
+      type: Number,
+      default: 0
+    },
+    fats: {
+      type: Number,
+      default: 0
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now
