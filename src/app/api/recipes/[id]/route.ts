@@ -5,9 +5,10 @@ import Recipe from '@/models/Recipe';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    const { id } = context.params;
     const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json(
@@ -16,7 +17,7 @@ export async function GET(
       );
     }
 
-    if (!params.id) {
+    if (!id) {
       return NextResponse.json(
         { error: 'Invalid recipe ID' },
         { status: 400 }
@@ -24,7 +25,7 @@ export async function GET(
     }
 
     await connectDB();
-    const recipe = await Recipe.findOne({ _id: params.id, userId: user.id });
+    const recipe = await Recipe.findOne({ _id: id, userId: user.id });
 
     if (!recipe) {
       return NextResponse.json(
@@ -49,9 +50,10 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
+    const { id } = context.params;
     const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json(
@@ -60,7 +62,7 @@ export async function DELETE(
       );
     }
 
-    if (!params.id) {
+    if (!id) {
       return NextResponse.json(
         { error: 'Invalid recipe ID' },
         { status: 400 }
@@ -68,7 +70,7 @@ export async function DELETE(
     }
 
     await connectDB();
-    const result = await Recipe.findOneAndDelete({ _id: params.id, userId: user.id });
+    const result = await Recipe.findOneAndDelete({ _id: id, userId: user.id });
 
     if (!result) {
       return NextResponse.json(
