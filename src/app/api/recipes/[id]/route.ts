@@ -3,12 +3,15 @@ import { getAuthenticatedUser } from '@/lib/auth';
 import connectDB from '@/lib/mongoose';
 import Recipe from '@/models/Recipe';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
+function extractIdFromRequest(request: NextRequest): string | null {
+  const url = new URL(request.url);
+  const parts = url.pathname.split('/');
+  return parts[parts.length - 1] || null;
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const { id } = context.params;
+    const id = extractIdFromRequest(request);
     const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json(
@@ -48,12 +51,9 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
-    const { id } = context.params;
+    const id = extractIdFromRequest(request);
     const user = await getAuthenticatedUser(request);
     if (!user) {
       return NextResponse.json(
