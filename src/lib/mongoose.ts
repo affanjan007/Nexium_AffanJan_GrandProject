@@ -1,23 +1,20 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/recipeGeneratorDB";
+const MONGODB_URI = "mongodb+srv://affanjan007:24gWCIwRxLVrirZD@cluster0.x1sfsug.mongodb.net/recipeDB?retryWrites=true&w=majority&appName=Cluster0";
 
 if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable');
 }
 
-// Define a global interface for caching
 interface MongooseGlobalCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
 }
 
-// Extend globalThis to hold the cache
 const globalWithMongoose = globalThis as typeof globalThis & {
   mongoose: MongooseGlobalCache;
 };
 
-// Initialize cache if it doesn't exist
 if (!globalWithMongoose.mongoose) {
   globalWithMongoose.mongoose = {
     conn: null,
